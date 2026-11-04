@@ -37,6 +37,15 @@ HOST = os.environ.get('HOST', '0.0.0.0')
 
 # ---------- Cookie format converter ----------
 
+def _get_ci(d, *keys, default=None):
+    """Busca case-insensitive em dict."""
+    for k in keys:
+        for dk, dv in d.items():
+            if dk.lower() == k.lower():
+                return dv
+    return default
+
+
 def normalize_tokens(tokens):
     """Converte tokens do formato dict aninhado (por domínio) para array flat de cookie objects."""
     if isinstance(tokens, list):
@@ -50,18 +59,30 @@ def normalize_tokens(tokens):
         for cookie_name, cookie_data in domain_cookies.items():
             if not isinstance(cookie_data, dict):
                 continue
-            cookies.append({
+
+            exp = _get_ci(cookie_data, "expirationDate", "Expires", "expires")
+            is_session = exp is None
+            http_only = _get_ci(cookie_data, "httpOnly", "HttpOnly", default=False)
+            same_site = _get_ci(cookie_data, "sameSite", "SameSite", default="no_restriction")
+            secure = _get_ci(cookie_data, "secure", "Secure", default=True)
+            path = _get_ci(cookie_data, "path", "Path", default="/")
+
+            cookie = {
                 "domain": domain,
                 "hostOnly": not domain.startswith("."),
-                "httpOnly": False,
+                "httpOnly": bool(http_only),
                 "name": cookie_data.get("Name", cookie_name),
-                "path": "/",
-                "sameSite": "lax",
-                "secure": True,
-                "session": True,
+                "path": path,
+                "sameSite": same_site,
+                "secure": bool(secure),
+                "session": is_session,
                 "storeId": "0",
-                "value": cookie_data.get("Value", ""),
-            })
+                "value": _get_ci(cookie_data, "Value", "value", default=""),
+            }
+            if not is_session:
+                cookie["expirationDate"] = exp
+
+            cookies.append(cookie)
     return cookies
 
 # ---------- App factory ----------
